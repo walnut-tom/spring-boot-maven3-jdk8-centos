@@ -1,0 +1,389 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "annotations": {
+            "iconClass": "icon-jboss",
+            "description": "Application template for Java Spring Boot applications built using S2I.",
+            "tags": "java,xpaas",
+            "version": "1.0.0",
+            "openshift.io/display-name": "Oracle server-JDK 8 with Maven 3 on Centos"
+        },
+        "name": "spring-boot-maven3-jdk8-centos"
+    },
+    "labels": {
+        "template": "spring-boot-maven3-jdk8-centos",
+        "xpaas": "1.4.0"
+    },
+    "message": "A new Java Spring Boot application has been created in your project.",
+    "parameters": [
+        {
+            "description": "The name for the application.",
+            "displayName": "Application Name",
+            "name": "APPLICATION_NAME",
+            "value": "app",
+            "required": true
+        },
+        {
+            "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>-<project>.<default-domain-suffix>",
+            "displayName": "Custom http Route Hostname",
+            "name": "HOSTNAME_HTTP",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Docker image",
+            "description": "Full image tag. You should only need to modify this if you've created your own image.",
+            "name": "IMAGE_STREAM_DESIGNATOR",
+            "value": "skjolber/spring-boot-maven3-jdk8-centos",
+            "required": true
+        },
+        {
+            "displayName": "Image version",
+            "description": "Image version. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
+            "name": "IMAGE_STREAM_VERSION",
+            "value": "latest",
+            "required": true
+        },
+        {
+            "description": "Git source URI for application",
+            "displayName": "Git Repository URL",
+            "name": "SOURCE_REPOSITORY_URL",
+            "value": "https://github.com/jboss-openshift/openshift-quickstarts",
+            "required": true
+        },
+        {
+            "description": "Git branch/tag reference",
+            "displayName": "Git Reference",
+            "name": "SOURCE_REPOSITORY_REF",
+            "value": "master",
+            "required": false
+        },
+        {
+            "description": "Path within Git project to build; empty for root project directory.",
+            "displayName": "Context Directory",
+            "name": "CONTEXT_DIR",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "Comma-seperated list of active Spring profiles",
+            "displayName": "Active profiles",
+            "name": "SPRING_ACTIVE_PROFILES",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "This variable specifies a relative location to your application binary inside the container.",
+            "displayName": "Runnable app target",
+            "name": "APP_TARGET",
+            "value": "./target",
+            "required": false
+        },
+        {
+            "description": "Maven profiles",
+            "displayName": "Active Maven profiles (comma-seperated).",
+            "name": "MAVEN_ACTIVE_PROFILES",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "Maven arguments",
+            "displayName": "Additional Maven arguments.",
+            "name": "MVN_ARGS",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "JVM arguments",
+            "displayName": "Additional JVM arguments",
+            "name": "JAVA_OPTS",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "CPU limit",
+            "displayName": "Limit container CPU-use.",
+            "name": "CPU_LIMIT",
+            "value": "1",
+            "required": true
+        },
+        {
+            "description": "Memory limit",
+            "displayName": "Limit container memory-use.",
+            "name": "MEMORY_LIMIT",
+            "value": "512Mi",
+            "required": true
+        },
+        {
+            "description": "JVM xms memory.",
+            "displayName": "Initial memory",
+            "name": "XMS",
+            "value": "32m",
+            "required": true
+        },
+        {
+            "description": "JVM xmx memory .",
+            "displayName": "Maximum memory",
+            "name": "XMX",
+            "value": "256m",
+            "required": true
+        },
+        {
+            "description": "GitHub trigger secret",
+            "displayName": "Github Webhook Secret",
+            "name": "GITHUB_WEBHOOK_SECRET",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
+        },
+        {
+            "description": "Generic build trigger secret",
+            "displayName": "Generic Webhook Secret",
+            "name": "GENERIC_WEBHOOK_SECRET",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
+        }
+
+    ],
+    "objects": [
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "ports": [
+                    {
+                        "port": 8080,
+                        "targetPort": 8080
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "The application's http port."
+                }
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "id": "${APPLICATION_NAME}-http",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "description": "Route for application's http service."
+                }
+            },
+            "spec": {
+                "host": "${HOSTNAME_HTTP}",
+                "to": {
+                    "name": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "${SOURCE_REPOSITORY_URL}",
+                        "ref": "${SOURCE_REPOSITORY_REF}"
+                    },
+                    "contextDir": "${CONTEXT_DIR}"
+                },
+                "strategy": {
+                    "type": "Source",
+                    "sourceStrategy": {
+                        "forcePull": true,
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "${IMAGE_STREAM_DESIGNATOR}:${IMAGE_STREAM_VERSION}"
+                        },
+		        "env": [
+				{
+		                	"name": "MAVEN_ACTIVE_PROFILES",
+		                	"value": "${MAVEN_ACTIVE_PROFILES}"
+				},
+				{
+		                	"name": "MVN_ARGS",
+		                	"value": "${MVN_ARGS}"
+				},
+				{
+		                	"name": "XMS",
+		                	"value": "${XMS}"
+				},
+				{
+		                	"name": "XMX",
+		                	"value": "${XMX}"
+				}
+		        ]
+                    }
+                },
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}:latest"
+                    }
+                },
+		"resources": {
+			"limits": {
+				"cpu": "${CPU_LIMIT}",
+				"memory": "${MEMORY_LIMIT}"
+			}
+		},
+                "triggers": [
+                    {
+                        "type": "GitHub",
+                        "github": {
+                            "secret": "${GITHUB_WEBHOOK_SECRET}"
+                        }
+                    },
+                    {
+                        "type": "Generic",
+                        "generic": {
+                            "secret": "${GENERIC_WEBHOOK_SECRET}"
+                        }
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {}
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate",
+		    "resources": {
+		    	"limits": {
+		      	"cpu": "${CPU_LIMIT}",
+		      	"memory": "${MEMORY_LIMIT}"
+		    }
+		  }
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "${APPLICATION_NAME}"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}:latest"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                },
+                "template": {
+                    "metadata": {
+                        "name": "${APPLICATION_NAME}",
+                        "labels": {
+                            "deploymentConfig": "${APPLICATION_NAME}",
+                            "application": "${APPLICATION_NAME}"
+                        }
+                    },
+                    "spec": {
+                        "terminationGracePeriodSeconds": 75,
+                        "containers": [
+                            {
+                                "name": "${APPLICATION_NAME}",
+                                "image": "${APPLICATION_NAME}",
+                                "imagePullPolicy": "Always",
+                                "env": [
+					{
+		                        	"name": "SPRING_ACTIVE_PROFILES",
+		                        	"value": "${SPRING_ACTIVE_PROFILES}"
+					},
+					{
+		                        	"name": "APP_TARGET",
+		                        	"value": "${APP_TARGET}"
+					},
+					{
+		                        	"name": "JAVA_OPTS",
+		                        	"value": "${JAVA_OPTS}"
+					},
+					{
+		                        	"name": "XMS",
+		                        	"value": "${XMS}"
+					},
+					{
+		                        	"name": "XMX",
+		                        	"value": "${XMX}"
+					}
+                                ],
+                                "ports": [
+                                    {
+                                        "name": "http",
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "https",
+                                        "containerPort": 8443,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+				"resources": {
+					"limits": {
+						"cpu": "${CPU_LIMIT}",
+						"memory": "${MEMORY_LIMIT}"
+					}
+				}
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}
