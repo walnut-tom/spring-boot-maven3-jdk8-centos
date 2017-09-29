@@ -104,3 +104,7 @@ After that you can execute `./test/run`. You can also use `make test` to automat
 ## Copyright
 
 Released under the Apache License 2.0. See the [LICENSE](LICENSE) file.
+
+
+http://trustmeiamadeveloper.com/2016/03/18/where-is-my-memory-java/
+https://spring.io/blog/2015/12/10/spring-boot-memory-performance

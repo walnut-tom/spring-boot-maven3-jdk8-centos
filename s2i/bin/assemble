@@ -6,27 +6,32 @@ set -e
 echo "---> Installing application source"
 cp -Rf /tmp/src/. ./
 
-MAVEN_OPTS="-Xms$XMS -Xmx$XMX"
-echo "---> Building Spring Boot application from source"
+echo "---> Building application from source"
 echo "--> # MVN_ARGS = $MVN_ARGS"
 echo "--> # MAVEN_OPTS = $MAVEN_OPTS"
 echo "--> # MAVEN_PROFILES = $MAVEN_ACTIVE_PROFILES"
-echo "---> Running build using command"
+echo "--> See documentation on .mvn/maven.config and .mvn/jvm.config for further build configuration."
 
 if [ "$MAVEN_ACTIVE_PROFILES" = "" ]
 then
+   echo "--> Running build"
    MAVEN_PROFILES=""
 else
+   echo "--> Running builds with profiles: $MAVEN_ACTIVE_PROFILES"
    MAVEN_PROFILES="-P$MAVEN_ACTIVE_PROFILES"
 fi
 
-if [ -f "mvnw" ]; then
-  echo "./mvnw clean install $MAVEN_PROFILES $MVN_ARGS"
-  ./mvnw clean install $MAVEN_PROFILES $MVN_ARGS 
+if [ -f "build.sh" ]; then
+	echo "Running custom build script"
+	./build.sh
 else
-  echo "mvn clean install $MAVEN_PROFILES $MVN_ARGS"
-  mvn clean install $MAVEN_PROFILES $MVN_ARGS
+	if [ -f "mvnw" ]; then
+	  echo "./mvnw clean install $MAVEN_PROFILES $MVN_ARGS"
+	  ./mvnw clean install $MAVEN_PROFILES $MVN_ARGS 
+	else
+	  echo "mvn clean install $MAVEN_PROFILES $MVN_ARGS"
+	  mvn clean install $MAVEN_PROFILES $MVN_ARGS
+	fi
 fi
-
 # Fix source directory permissions
 fix-permissions ./

@@ -68,7 +68,7 @@
         },
         {
             "description": "Comma-seperated list of active Spring profiles",
-            "displayName": "Active profiles",
+            "displayName": "Active Spring profiles",
             "name": "SPRING_ACTIVE_PROFILES",
             "value": "",
             "required": false
@@ -78,20 +78,6 @@
             "displayName": "Runnable app target",
             "name": "APP_TARGET",
             "value": "./target",
-            "required": false
-        },
-        {
-            "description": "Maven profiles",
-            "displayName": "Active Maven profiles (comma-seperated).",
-            "name": "MAVEN_ACTIVE_PROFILES",
-            "value": "",
-            "required": false
-        },
-        {
-            "description": "Maven arguments",
-            "displayName": "Additional Maven arguments.",
-            "name": "MVN_ARGS",
-            "value": "",
             "required": false
         },
         {
@@ -109,7 +95,7 @@
             "required": true
         },
         {
-            "description": "Memory limit",
+            "description": "Runtime memory limit",
             "displayName": "Limit container memory-use.",
             "name": "MEMORY_LIMIT",
             "value": "512Mi",
@@ -127,6 +113,41 @@
             "displayName": "Maximum memory",
             "name": "XMX",
             "value": "256m",
+            "required": true
+        },
+        {
+            "description": "Maven profiles",
+            "displayName": "Active Maven profiles (comma-seperated).",
+            "name": "MAVEN_ACTIVE_PROFILES",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "Maven arguments",
+            "displayName": "Additional Maven arguments. Alternatively provide an .mvn/maven.config file.",
+            "name": "MVN_ARGS",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "Maven JVM arguments",
+            "displayName": "Maven JVM arguments (via MAVEN_OPTS). Alternatively provide an .mvn/jvm.config file.",
+            "name": "MAVEN_OPTS",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "Build CPU limit",
+            "displayName": "Limit container CPU-use while building.",
+            "name": "BUILD_CPU_LIMIT",
+            "value": "1",
+            "required": true
+        },
+        {
+            "description": "Runtime memory limit",
+            "displayName": "Limit container memory-use while building.",
+            "name": "BUILD_MEMORY_LIMIT",
+            "value": "1024Mi",
             "required": true
         },
         {
@@ -238,6 +259,10 @@
 		                	"value": "${MVN_ARGS}"
 				},
 				{
+		                	"name": "MAVEN_OPTS",
+		                	"value": "${MAVEN_OPTS}"
+				},
+				{
 		                	"name": "XMS",
 		                	"value": "${XMS}"
 				},
@@ -248,18 +273,18 @@
 		        ]
                     }
                 },
+		"resources": {
+			"limits": {
+				"cpu": "${BUILD_CPU_LIMIT}",
+				"memory": "${BUILD_MEMORY_LIMIT}"
+			}
+		},
                 "output": {
                     "to": {
                         "kind": "ImageStreamTag",
                         "name": "${APPLICATION_NAME}:latest"
                     }
                 },
-		"resources": {
-			"limits": {
-				"cpu": "${CPU_LIMIT}",
-				"memory": "${MEMORY_LIMIT}"
-			}
-		},
                 "triggers": [
                     {
                         "type": "GitHub",

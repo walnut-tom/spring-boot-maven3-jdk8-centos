@@ -8,7 +8,7 @@ FROM openshift/base-centos7
 EXPOSE 8080
 
 ENV JAVA_VERSON 1.8.0
-ENV MAVEN_VERSION 3.3.9
+ENV MAVEN_VERSION 3.5.0
 
 RUN curl --insecure --junk-session-cookies --location --remote-name --silent --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u144-b01/090f390dda5b47b9b721c7dfaa008135/server-jre-8u144-linux-x64.tar.gz  && \
     mkdir -p /usr/java && \
@@ -18,6 +18,12 @@ RUN curl --insecure --junk-session-cookies --location --remote-name --silent --h
     alternatives --install /usr/bin/jar  jar  /usr/java/jdk1.8.0_144/bin/jar  1 && \
     rm server-jre-8u144-linux-x64.tar
 
+# download Java Cryptography Extension
+RUN curl -LO "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip" -H 'Cookie: oraclelicense=accept-securebackup-cookie' && \
+    unzip jce_policy-8.zip && \
+    rm jce_policy-8.zip && \
+    yes |cp -v ./UnlimitedJCEPolicyJDK8/*.jar /usr/java/jdk1.8.0_144/jre/lib/security/
+
 ENV JAVA_HOME=/usr/java/jdk1.8.0_144
 
 RUN curl -fsSL https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | tar xzf - -C /usr/share \
@@ -26,7 +32,7 @@ RUN curl -fsSL https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/bina
 
 ENV MAVEN_HOME /usr/share/maven
 
-RUN yum update -y && yum clean all
+RUN yum update -y && yum clean all && rm -rf /var/cache/yum
 
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
@@ -36,3 +42,6 @@ USER 1001
 
 # Set the default CMD to print the usage of the language image
 CMD $STI_SCRIPTS_PATH/usage
+
+RUN cat /etc/redhat-release
+
