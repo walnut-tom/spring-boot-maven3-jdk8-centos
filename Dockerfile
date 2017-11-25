@@ -10,8 +10,9 @@ MAINTAINER hetao <walnut_tom@qq.com>
 LABEL io.k8s.description="Platform for building and running Spring Boot applications" \
 	io.k8s.display-name="Spring Boot Maven 3" \
 	io.openshift.expose-services="8080:http" \
-	io.openshift.tags="builder,java,java8,maven,maven3,spring-boot" 
-    
+	io.openshift.tags="builder,java,java8,maven,maven3,spring-boot" \
+	io.openshift.s2i.destination="/opt/app"
+
 ENV LANG eu_US.UTF-8
 ENV JAVA_VERSON 1.8.0
 ENV MAVEN_VERSION 3.5.2
@@ -30,7 +31,7 @@ ENV PATH ${HOME}/bin:$PATH:${JAVA_HOME}/jre/bin:${JAVA_HOME}/bin:${MAVEN_HOME}/b
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 
-RUN chown -R 1001:0 /opt/app-root
+RUN mkdir -p /opt/{app-root,app} ; chown -R 1001:0 /opt/app-root ; chown -R 1001:0 /opt/app
 USER 1001
 
 EXPOSE 8080
