@@ -13,7 +13,7 @@ LABEL io.k8s.description="Platform for building and running Spring Boot applicat
 	io.openshift.tags="builder,java,java8,maven,maven3,spring-boot" \
 	io.openshift.s2i.destination="/opt/app"
 
-ENV LANG C.UTF-8
+ENV LANG eu_US.UTF-8
 ENV JAVA_VERSON 1.8.0
 ENV MAVEN_VERSION 3.5.2
 
@@ -21,7 +21,7 @@ RUN curl -fsSL http://mirror.bit.edu.cn/apache/maven/maven-3/$MAVEN_VERSION/bina
   && mv /usr/share/apache-maven-$MAVEN_VERSION /usr/share/maven \
   && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 
-RUN yum update -y && yum install java-${JAVA_VERSON}-openjdk-devel && yum clean all && rm -rf /var/cache/yum
+RUN yum update -y && yum install java-${JAVA_VERSON}-openjdk-devel -y && yum clean all && rm -rf /var/cache/yum
 
 ENV HOME /opt/app-root/src
 ENV MAVEN_HOME /usr/share/maven
