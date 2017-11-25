@@ -10,9 +10,8 @@ MAINTAINER hetao <walnut_tom@qq.com>
 LABEL io.k8s.description="Platform for building and running Spring Boot applications" \
 	io.k8s.display-name="Spring Boot Maven 3" \
 	io.openshift.expose-services="8080:http" \
-	io.openshift.tags="builder,java,java8,maven,maven3,spring-boot" \
-	io.openshift.s2i.destination="/opt/app"
-
+	io.openshift.tags="builder,java,java8,maven,maven3,spring-boot" 
+    
 ENV LANG eu_US.UTF-8
 ENV JAVA_VERSON 1.8.0
 ENV MAVEN_VERSION 3.5.2
