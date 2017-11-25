@@ -23,10 +23,9 @@ RUN curl -fsSL http://mirror.bit.edu.cn/apache/maven/maven-3/$MAVEN_VERSION/bina
 
 RUN yum update -y && yum install java-${JAVA_VERSON}-openjdk-devel -y && yum clean all && rm -rf /var/cache/yum
 
-ENV HOME /opt/app-root/src
 ENV MAVEN_HOME /usr/share/maven
 ENV JAVA_HOME /usr/lib/jvm/java-${JAVA_VERSON}-openjdk
-ENV PATH ${HOME}/bin:$PATH:${JAVA_HOME}/jre/bin:${JAVA_HOME}/bin:${MAVEN_HOME}/bin
+ENV PATH $PATH:${JAVA_HOME}/jre/bin:${JAVA_HOME}/bin:${MAVEN_HOME}/bin
 
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH

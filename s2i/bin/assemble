@@ -3,6 +3,11 @@
 
 set -e
 
+if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
+  echo "---> Restoring build artifacts..."
+  mv /tmp/s2i/artifacts/* $HOME/.m2
+fi
+
 echo "---> Installing application source"
 cp -Rf /tmp/src/. ./
 
