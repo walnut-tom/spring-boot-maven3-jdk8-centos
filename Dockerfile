@@ -31,7 +31,7 @@ ENV PATH ${HOME}/bin:$PATH:${JAVA_HOME}/jre/bin:${JAVA_HOME}/bin:${MAVEN_HOME}/b
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 
-RUN mkdir -p /opt/{app-root,app} ; chown -R 1001:0 /opt/app-root ; chown -R 1001:0 /opt/app
+RUN mkdir -p /tmp/src; chmod 777 /tmp/src ; mkdir -p /opt/{app-root,app} ; chown -R 1001:0 /opt/app-root ; chown -R 1001:0 /opt/app
 USER 1001
 
 EXPOSE 8080
