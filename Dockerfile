@@ -1,44 +1,40 @@
-# spring-boot-maven3-jdk8-centos
+# spring-boot-s2i
 #
 # This image provide a base for running Spring Boot based applications. It
 # provides a base Java 8 installation and Maven 3.
 
-FROM openshift/base-centos7
+FROM sclorg/s2i-core-centos7
 
-EXPOSE 8080
+MAINTAINER hetao <walnut_tom@qq.com>
 
-ENV JAVA_VERSON 1.8.0
-ENV MAVEN_VERSION 3.5.2
+LABEL io.k8s.description="Platform for building and running Spring Boot applications" \
+	io.k8s.display-name="Spring Boot Maven 3" \
+	io.openshift.expose-services="8080:http" \
+	io.openshift.tags="builder,java,java8,maven,maven3,spring-boot" \
+	io.openshift.s2i.destination="/opt/app"
 
-RUN curl --insecure --junk-session-cookies --location --remote-name --silent --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u152-b16/aa0333dd3019491ca4f6ddbe78cdb6d0/server-jre-8u152-linux-x64.tar.gz  && \
-    mkdir -p /usr/java && \
-    gunzip server-jre-8u152-linux-x64.tar.gz && \
-    tar xf server-jre-8u152-linux-x64.tar -C /usr/java && \
-    alternatives --install /usr/bin/java java /usr/java/jdk1.8.0_152/bin/java 1 && \
-    alternatives --install /usr/bin/jar  jar  /usr/java/jdk1.8.0_152/bin/jar  1 && \
-    rm server-jre-8u152-linux-x64.tar
-
-# download Java Cryptography Extension
-RUN curl -LO "http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip" -H 'Cookie: oraclelicense=accept-securebackup-cookie' && \
-    unzip jce_policy-8.zip && \
-    rm jce_policy-8.zip && \
-    yes |cp -v ./UnlimitedJCEPolicyJDK8/*.jar /usr/java/jdk1.8.0_152/jre/lib/security/
-
-ENV JAVA_HOME=/usr/java/jdk1.8.0_152
-
-RUN curl -fsSL https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | tar xzf - -C /usr/share \
+RUN curl -fsSL http://mirror.bit.edu.cn/apache/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz | tar xzf - -C /usr/share \
   && mv /usr/share/apache-maven-$MAVEN_VERSION /usr/share/maven \
   && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 
-ENV MAVEN_HOME /usr/share/maven
 
-RUN yum update -y && yum clean all && rm -rf /var/cache/yum
+RUN yum update -y && yum install java-${JAVA_VERSON}-openjdk-devel && yum clean all && rm -rf /var/cache/yum
+
+ENV LANG C.UTF-8
+ENV JAVA_VERSON 1.8.0
+ENV MAVEN_VERSION 3.5.2
+ENV HOME /opt/app-root/src
+ENV MAVEN_HOME /usr/share/maven
+ENV JAVA_HOME /usr/lib/jvm/java-${JAVA_VERSON}-openjdk
+ENV PATH ${HOME}/bin:$PATH:${JAVA_HOME}/jre/bin:${JAVA_HOME}/bin:${MAVEN_HOME}/bin
 
 # Add configuration files, bashrc and other tweaks
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 
 RUN chown -R 1001:0 /opt/app-root
 USER 1001
+
+EXPOSE 8080
 
 # Set the default CMD to print the usage of the language image
 CMD $STI_SCRIPTS_PATH/usage

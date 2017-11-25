@@ -3,16 +3,16 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "iconClass": "icon-jboss",
-            "description": "Application template for Java Spring Boot applications built using S2I.",
-            "tags": "java,xpaas",
+            "iconClass": "icon-openjdk",
+            "description": "Application template for Java, Spring Boot applications built using S2I.",
+            "tags": "builder,java,java8,maven,maven3,spring-boot,xpaas",
             "version": "1.0.0",
-            "openshift.io/display-name": "Oracle server-JDK 8 with Maven 3 on Centos"
+            "openshift.io/display-name": "Open JDK 8 with Maven 3 on Centos7"
         },
-        "name": "spring-boot-maven3-jdk8-centos"
+        "name": "spring-boot-s2i"
     },
     "labels": {
-        "template": "spring-boot-maven3-jdk8-centos",
+        "template": "spring-boot-s2i",
         "xpaas": "1.4.0"
     },
     "message": "A new Java Spring Boot application has been created in your project.",
@@ -35,7 +35,7 @@
             "displayName": "Docker image",
             "description": "Full image tag. You should only need to modify this if you've created your own image.",
             "name": "IMAGE_STREAM_DESIGNATOR",
-            "value": "skjolber/spring-boot-maven3-jdk8-centos",
+            "value": "skjolber/spring-boot-s2i",
             "required": true
         },
         {
@@ -49,8 +49,15 @@
             "description": "Git source URI for application",
             "displayName": "Git Repository URL",
             "name": "SOURCE_REPOSITORY_URL",
-            "value": "https://github.com/jboss-openshift/openshift-quickstarts",
+            "value": "https://github.com/walnut-tom/spring-boot-sti-test.git",
             "required": true
+        },
+        {
+            "description": "Git source URI for application",
+            "displayName": "Git Repository URL",
+            "name": "SOURCE_REPOSITORY_SECRET",
+            "value": "",
+            "required": false
         },
         {
             "description": "Git branch/tag reference",
@@ -165,8 +172,14 @@
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
             "required": true
+        },
+        {
+            "description": "Number of replicas to run",
+            "displayName": "Number of replicas to run",
+            "name": "REPLICA_COUNT",
+            "value": "1",
+            "required": true
         }
-
     ],
     "objects": [
         {
@@ -239,7 +252,10 @@
                         "uri": "${SOURCE_REPOSITORY_URL}",
                         "ref": "${SOURCE_REPOSITORY_REF}"
                     },
-                    "contextDir": "${CONTEXT_DIR}"
+                    "contextDir": "${CONTEXT_DIR}",
+                    "sourceSecret": {
+                        "name": "${SOURCE_REPOSITORY_SECRET}"
+                    }
                 },
                 "strategy": {
                     "type": "Source",
@@ -345,7 +361,7 @@
                         "type": "ConfigChange"
                     }
                 ],
-                "replicas": 1,
+                "replicas": "${REPLICA_COUNT}",
                 "selector": {
                     "deploymentConfig": "${APPLICATION_NAME}"
                 },
